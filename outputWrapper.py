@@ -62,16 +62,13 @@ class OutputWrapper:
 
 
 class ModelOutputVisualizer:
-    def __init__(self):
+
+    def visualize(self, image, model_output):
         self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
-
         self.ax1.axis('off')
-
         self.ax2.set_title("Road lines")
         self.ax2.set_xlabel("red - road lines | green - predicted path | yellow - lane lines")
         self.ax2.set_ylabel("Range")
-
-    def visualize(self, image, model_output):
         points_ll_t2, points_l_t, points_r_t, points_rr_t2 = model_output.get_lane_points()
         points_roadr_t2, points_roadl_t = model_output.get_road_points()
         middle = (points_ll_t2 + points_l_t) / 2
@@ -86,7 +83,25 @@ class ModelOutputVisualizer:
         self.ax2.plot(points_roadl_t, X_IDXS, color="r", linewidth=2)
 
         plt.draw()
-        plt.pause(0.001)
+
+    def compare_visualize(self, image, model_outputs):
+        self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(20, 12))
+        self.ax1.axis('off')
+        self.ax2.set_title("Road lines")
+        self.ax2.set_ylabel("Range")
+        self.ax1.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        self.ax2.clear()
+        colors = ["r", "g", "b", "y"]
+        for idx, model_output in enumerate(model_outputs):
+            points_ll_t2, points_l_t, points_r_t, points_rr_t2 = model_output.get_lane_points()
+            points_roadr_t2, points_roadl_t = model_output.get_road_points()
+
+            self.ax2.plot(points_ll_t2, X_IDXS, color=colors[idx],  linewidth=2)
+            self.ax2.plot(points_l_t, X_IDXS, color=colors[idx],  linewidth=2)
+            self.ax2.plot(points_roadr_t2, X_IDXS, color=colors[idx],  linewidth=2)
+            self.ax2.plot(points_roadl_t, X_IDXS, color=colors[idx],  linewidth=2)
+
+        plt.draw()
 
 
 
